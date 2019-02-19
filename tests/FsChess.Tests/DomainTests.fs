@@ -5,6 +5,8 @@ open System
 open Expecto
 open FsChess.Result
 open FsChess.Domain
+open Expecto.Flip
+open System
 
 let ``Initial Board State`` =
     [
@@ -88,9 +90,9 @@ let tests =
         testCase "Board is initialised correctly" <| fun _ ->
             let gameState = initialiseGame()
 
-            Expect.equal gameState.Board ``Initial Board State`` "Something went wrong drawing the board in initialiseGame()"
-            Expect.equal gameState.NextMove WhiteToMove "Something went wrong setting correct player in initialiseGame()"
-            Expect.equal gameState.Status InProgress "Something went wrong setting correct status in initialiseGame()"
+            gameState.Board |> Expect.equal "Something went wrong drawing the board in initialiseGame()" ``Initial Board State``
+            gameState.NextMove |> Expect.equal "Something went wrong setting correct player in initialiseGame()" WhiteToMove
+            gameState.Status |> Expect.equal "Something went wrong setting correct status in initialiseGame()" InProgress
 
 
         testCase "Distance is calculated correctly" <| fun _ ->
@@ -101,7 +103,7 @@ let tests =
 
             let expected = {Horizontal = 0; Vertical = 1;}
 
-            Expect.equal (getDistance move) expected "Pawn should only have moved one sqaure forward"
+            (getDistance move) |> Expect.equal "Pawn should only have moved one sqaure forward" expected
 
         testCase "Board updated correctly when pawn moved" <| fun _ ->
             let originalSqaure = (A, Two)
@@ -117,13 +119,13 @@ let tests =
                 Piece = piece
             }
 
-            Expect.equal (board.[originalSqaure]) (Some piece) "Pawn not in correct place"
+            (board.[originalSqaure]) |> Expect.equal "Pawn not in correct place" (Some piece)
 
             let board' = updateBoard board move
             let movedPiece = {piece with Rank = Pawn Moved}
 
-            Expect.equal (board'.[originalSqaure]) None "Square should now be empty"
-            Expect.equal (board'.[targetSquare]) (Some movedPiece) "Square should now have moved pawn in it"
+            (board'.[originalSqaure]) |> Expect.equal "Square should now be empty" None
+            (board'.[targetSquare]) |> Expect.equal "Square should now have moved pawn in it" (Some movedPiece)
 
         testCase "Board updated correctly when knight moved" <| fun _ ->
             let originalSqaure = (B, One)
@@ -139,11 +141,99 @@ let tests =
                 Piece = piece
             }
 
-            Expect.equal (board.[originalSqaure]) (Some piece) "Knight not in correct place"
+            (board.[originalSqaure]) |> Expect.equal "Knight not in correct place" (Some piece)
 
             let board' = updateBoard board move
 
-            Expect.equal (board'.[originalSqaure]) None "Square should now be empty"
-            Expect.equal (board'.[targetSquare]) (Some piece) "Square should now have moved Knight in it"
+            (board'.[originalSqaure]) |> Expect.equal "Square should now be empty" None
+            (board'.[targetSquare]) |> Expect.equal "Square should now have moved Knight in it" (Some piece)
+
+        testCase "validatePieceSelected throws error on empty square" <| fun _ ->
+            let game = initialiseGame()
+            let board = game.Board
+
+            let response = validatePieceSelected board { From = (C, Six); To = (D, Six) }
+
+            response |> Expect.equal "There should not be a piece here" (Error "You must select a piece")
+
+        testCase "validatePieceSelected returns OK when square populated" <| fun _ ->
+            let game = initialiseGame()
+            let board = game.Board
+
+            let input = { From = (A, Two); To = (C, Three) }
+            let piece = board.[input.From]
+
+            let expected = { SelectedPiece = piece.Value; From = input.From; To = input.To }
+
+            let response = validatePieceSelected board input
+
+            response |> Expect.equal "There should not be a piece here" (Ok expected)         
+
+        testCase "validateNoFriendlyFire won't allow white rook to capture own pawn" <| fun _ ->
+            let game = initialiseGame()
+            let board = game.Board
+
+            let move = { SelectedPiece = { Player = White; Rank = Rook }; From = (A, One); To = (A, Two) }
+
+            let expected = Error "You cannot capture your own piece"
+
+            let actual = validateNoFriendlyFire board game.NextMove move
+
+            actual |> Expect.equal "Should not be allowed capature own piece" expected
+
+        testCase "validateNoFriendlyFire won't allow black rook to capture own pawn" <| fun _ ->
+            let game = { initialiseGame() with NextMove = BlackToMove }
+            let board = game.Board
+
+            let move = { SelectedPiece = { Player = Black; Rank = Rook }; From = (A, Eight); To = (A, Seven) }
+
+            let expected = Error "You cannot capture your own piece"
+
+            let actual = validateNoFriendlyFire board game.NextMove move
+
+            actual |> Expect.equal "Should not be allowed capature own piece" expected
+
+        testCase "validateNoFriendlyFire will allow white rook to capture black pawn" <| fun _ ->
+            let game = initialiseGame()
+
+            let from = (D, Three)
+            let target = (D, Four)
+
+            let rook = { Player = White; Rank = Rook }
+            let pawn = { Player = Black; Rank = Pawn Moved }
+
+            let board =
+                game.Board
+                    .Add(from, Some rook)
+                    .Add(target, Some pawn)
+
+            let move = { SelectedPiece = rook; From = from; To = target }
+
+            let expected = Ok move
+
+            let actual = validateNoFriendlyFire board game.NextMove move
+
+            actual |> Expect.equal "Should be allowed capature enemy piece" expected
+
+        testCase "validateNoFriendlyFire will allow white rook to move to empty square" <| fun _ ->
+            let game = initialiseGame()
+
+            let from = (D, Three)
+            let target = (D, Four)
+
+            let rook = { Player = White; Rank = Rook }
+
+            let board =
+                game.Board
+                    .Add(from, Some rook)
+                    .Add(target, None)
+
+            let move = { SelectedPiece = rook; From = from; To = target }
+
+            let expected = Ok move
+
+            let actual = validateNoFriendlyFire board game.NextMove move
+
+            actual |> Expect.equal "Should be allowed move to empty square" expected              
 
     ]

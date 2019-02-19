@@ -89,7 +89,7 @@ module Domain =
         | None -> Error "You must select a piece"
 
 
-    let validatePieceIsGood (board : Board) nextMove (move : ProposedMoveWithKnownPiece) =
+    let validatePieceIsGood nextMove (move : ProposedMoveWithKnownPiece) =
         match (nextMove, move.SelectedPiece.Player) with
         | (WhiteToMove, White)
         | (BlackToMove, Black)
@@ -109,18 +109,21 @@ module Domain =
             | _ -> Error "You cannot capture your own piece"
         | None -> Ok move
 
-    let validatePawn (board: Board) (move : ProposedMove) pawnState =
+    let validatePawn (board: Board) (move : ProposedMoveWithKnownPiece) =
 
-        match pawnState with
-        | NotMoved -> ""
-        | Moved -> ""
+        match move.SelectedPiece.Rank with
+        | Pawn NotMoved -> Ok move
+        | Pawn Moved -> Ok move
+        | _ -> Error ""
 
     let validateMove (gameState : GameState) (move : ProposedMove) =
 
         result {
             return!            
                 validatePieceSelected gameState.Board move
-                >>= validatePieceIsGood gameState.Board gameState.NextMove
+                >>= validatePieceIsGood gameState.NextMove
                 >>= validateNoFriendlyFire gameState.Board gameState.NextMove
+                // All move validation goes here
+                >>= markMoveAsValidated
         }
 
