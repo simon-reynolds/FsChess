@@ -100,7 +100,8 @@ let tests =
 let moveTests =
     testList "Moves" [
         testCase "Distance is calculated correctly" <| fun _ ->
-            let move : ProposedMove = {
+            let move : ProposedMoveWithKnownPiece = {
+                SelectedPiece = { Player = White; Rank = Pawn Moved }
                 From = (A,Two)
                 To = (A,Three)
             }

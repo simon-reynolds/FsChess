@@ -33,11 +33,10 @@ module Domain =
     type GameState = { Board : Board; NextMove : NextMove; Status : GameStatus; Message : string }
     type Distance = { Horizontal : int; Vertical : int }
 
-    let getDistance (move : ProposedMove) =
+    let getDistance (move : ProposedMoveWithKnownPiece) =
 
         let fromX, fromY = move.From
         let toX, toY = move.To
-
 
         let deltaX = (Column.List |> List.findIndex (fun c -> c = toX)) - (Column.List |> List.findIndex (fun c -> c = fromX))
         let deltaY = (Row.List |> List.findIndex (fun c -> c = toY)) - (Row.List |> List.findIndex (fun c -> c = fromY))
@@ -109,12 +108,38 @@ module Domain =
             | _ -> Error "You cannot capture your own piece"
         | None -> Ok move
 
-    let validatePawn (board: Board) (move : ProposedMoveWithKnownPiece) =
-
+    let validateMoveForPiece (board : Board) (move : ProposedMoveWithKnownPiece) =
+        let distance = getDistance move
+        
         match move.SelectedPiece.Rank with
         | Pawn NotMoved -> Ok move
         | Pawn Moved -> Ok move
-        | _ -> Error ""
+        | Rook ->
+            match ((abs distance.Horizontal), (abs distance.Vertical)) with
+            | (x, y) when x > 0 && y = 0 -> Ok move
+            | (x, y) when x = 0 && y > 0 -> Ok move
+            | _ -> Error ""
+        | Knight ->
+            match ((abs distance.Horizontal), (abs distance.Vertical)) with
+            | (2, 1) -> Ok move
+            | (1, 2) -> Ok move
+            | _ -> Error ""
+        | Bishop ->
+            match ((abs distance.Horizontal), (abs distance.Vertical)) with
+            | (x, y) when x > 0 && y = x -> Ok move
+            | _ -> Error ""
+        | Queen ->
+            match ((abs distance.Horizontal), (abs distance.Vertical)) with
+            | (x, y) when x > 0 && y = 0 -> Ok move
+            | (x, y) when x = 0 && y > 0 -> Ok move
+            | (x, y) when x > 0 && y = x -> Ok move
+            | _ -> Error ""
+        | King ->
+            match ((abs distance.Horizontal), (abs distance.Vertical)) with
+            | (x, y) when x = 1 && y = 0 -> Ok move
+            | (x, y) when x = 0 && y = 1 -> Ok move
+            | (x, y) when x = 1 && y = 1 -> Ok move
+            | _ -> Error ""
 
     let validateMove (gameState : GameState) (move : ProposedMove) =
 
@@ -124,6 +149,6 @@ module Domain =
                 >>= validatePieceIsGood gameState.NextMove
                 >>= validateNoFriendlyFire gameState.Board gameState.NextMove
                 // All move validation goes here
+                >>= validateMoveForPiece gameState.Board
                 >>= markMoveAsValidated
         }
-
