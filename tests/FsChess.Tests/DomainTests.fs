@@ -93,8 +93,12 @@ let tests =
             gameState.Board |> Expect.equal "Something went wrong drawing the board in initialiseGame()" ``Initial Board State``
             gameState.NextMove |> Expect.equal "Something went wrong setting correct player in initialiseGame()" WhiteToMove
             gameState.Status |> Expect.equal "Something went wrong setting correct status in initialiseGame()" InProgress
+    ]
 
 
+[<Tests>]
+let moveTests =
+    testList "Moves" [
         testCase "Distance is calculated correctly" <| fun _ ->
             let move : ProposedMove = {
                 From = (A,Two)
@@ -147,7 +151,12 @@ let tests =
 
             (board'.[originalSqaure]) |> Expect.equal "Square should now be empty" None
             (board'.[targetSquare]) |> Expect.equal "Square should now have moved Knight in it" (Some piece)
+    ]
 
+
+[<Tests>]
+let validationTests =
+    testList "Validation" [
         testCase "validatePieceSelected throws error on empty square" <| fun _ ->
             let game = initialiseGame()
             let board = game.Board
@@ -167,7 +176,7 @@ let tests =
 
             let response = validatePieceSelected board input
 
-            response |> Expect.equal "There should not be a piece here" (Ok expected)         
+            response |> Expect.equal "There should not be a piece here" (Ok expected)
 
         testCase "validateNoFriendlyFire won't allow white rook to capture own pawn" <| fun _ ->
             let game = initialiseGame()
@@ -196,8 +205,7 @@ let tests =
         testCase "validateNoFriendlyFire will allow white rook to capture black pawn" <| fun _ ->
             let game = initialiseGame()
 
-            let from = (D, Three)
-            let target = (D, Four)
+            let from, target = ((D, Three), (D, Four))
 
             let rook = { Player = White; Rank = Rook }
             let pawn = { Player = Black; Rank = Pawn Moved }
@@ -218,8 +226,7 @@ let tests =
         testCase "validateNoFriendlyFire will allow white rook to move to empty square" <| fun _ ->
             let game = initialiseGame()
 
-            let from = (D, Three)
-            let target = (D, Four)
+            let from, target = ((D, Three), (D, Four))
 
             let rook = { Player = White; Rank = Rook }
 
@@ -234,6 +241,6 @@ let tests =
 
             let actual = validateNoFriendlyFire board game.NextMove move
 
-            actual |> Expect.equal "Should be allowed move to empty square" expected              
+            actual |> Expect.equal "Should be allowed move to empty square" expected
 
     ]
