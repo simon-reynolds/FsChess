@@ -137,7 +137,7 @@ Target.create "DotnetBuild" <| fun ctx ->
 
 let invokeAsync f = async { f () }
 
-let coverageThresholdPercent = 37
+let coverageThresholdPercent = 50
 
 Target.create "DotnetTest" <| fun ctx ->
     !! testsGlob
