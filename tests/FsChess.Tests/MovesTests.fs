@@ -5,6 +5,25 @@ open FsChess.Domain
 open FsChess.Moves
 open Expecto.Flip
 
+let allSquares = Row.List |> Seq.allPairs Column.List
+
+let gameStateWithEmptyBoard player =
+    
+    let squares = allSquares |> Seq.map (fun sq -> (sq, None))
+    {
+        Board = squares |> Map
+        CurrentPlayer = player
+        Status = InProgress
+        Message = ""
+        MoveHistory = []
+    }
+
+let addPiece piece location gameState =
+    { gameState with Board = gameState.Board.Add(location, Some piece)}
+
+let removePiece location gameState =
+    { gameState with Board = gameState.Board.Add(location, None)}
+
 [<Tests>]
 let moveTests =
     testList "Moves" [
@@ -239,4 +258,205 @@ let validationTests =
             state.Board.[validMove.From] |> Expect.equal "Next move is by Black" None
             state.Board.[validMove.To] |> Expect.equal "Pawn has been moved" (Some {Player = White; Rank = Pawn Moved })
 
+    ]
+
+[<Tests>]
+let moveValidationTests =
+    testList "Validation" [
+
+        testCase "NotMoved Pawn - only valid moves allowed" <| fun _ ->
+            let pawn = { Player = White; Rank = Pawn NotMoved }
+            let start = (D, Two)
+
+            let game = gameStateWithEmptyBoard White |> addPiece pawn start
+
+            let validLocations = [
+                (D, Three)
+                (D, Four)
+            ]
+
+            allSquares
+            |> Seq.iter(fun sq ->
+                let move = { SelectedPiece = pawn; From = start; To = sq }
+
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+
+                match validLocations |> List.contains sq with
+                | true -> result |> Expect.equal "Valid move" (Ok move)
+                | false -> result |> Expect.equal "Invalid move" (Error "")
+            )  
+
+        testCase "Moved Pawn - only valid moves allowed" <| fun _ ->
+            let pawn = { Player = White; Rank = Pawn Moved }
+            let start = (D, Five)
+
+            let targetPiece = { Player = Black; Rank = Queen }
+
+            let game = gameStateWithEmptyBoard White |> addPiece pawn start |> addPiece targetPiece (E, Six)
+
+            let validLocations = [
+                (D, Six)
+                (E, Six)
+            ]
+
+            allSquares
+            |> Seq.iter(fun sq ->
+                let move = { SelectedPiece = pawn; From = start; To = sq }
+
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+
+                match validLocations |> List.contains sq with
+                | true -> result |> Expect.equal "Valid move" (Ok move)
+                | false -> result |> Expect.equal "Invalid move" (Error "")
+            )
+
+        testCase "Rook - only valid moves allowed" <| fun _ ->
+            let rook = { Player = White; Rank = Rook }
+            let start = (D, Five)
+
+            let game = gameStateWithEmptyBoard White |> addPiece rook start
+
+            allSquares
+            |> Seq.iter(fun sq ->
+                let move = { SelectedPiece = rook; From = start; To = sq }
+
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+
+                match sq with
+                | (D, Five) -> result |> Expect.equal "Invalid move" (Error "")
+                | (D, _)
+                | (_, Five)
+                    -> result |> Expect.equal "Valid move" (Ok move)
+                | _ -> result |> Expect.equal "Invalid move" (Error "")
+            )        
+
+        testCase "Knight - only valid moves allowed" <| fun _ ->
+            let knight = { Player = White; Rank = Knight }
+            let start = (D, Five)
+
+            let game = gameStateWithEmptyBoard White |> addPiece knight start
+
+            let validLocations = [
+                (B, Four)
+                (B, Six)
+                (C, Seven)
+                (C, Three)
+                (E, Seven)
+                (E, Three)
+                (F, Four)
+                (F, Six)
+            ]
+
+            allSquares
+            |> Seq.iter(fun sq ->
+                let move = { SelectedPiece = knight; From = start; To = sq }
+
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+
+                match validLocations |> List.contains sq with
+                | true -> result |> Expect.equal "Valid move" (Ok move)
+                | false -> result |> Expect.equal "Invalid move" (Error "")
+            )
+
+        testCase "Bishop - only valid moves allowed" <| fun _ ->
+            let bishop = { Player = White; Rank = Bishop }
+            let start = (D, Five)
+
+            let game = gameStateWithEmptyBoard White |> addPiece bishop start
+
+            let validLocations = [
+                (A, Eight)
+                (B, Seven)
+                (C, Six)
+                (E, Four)
+                (F, Three)
+                (G, Two)
+                (H, One)
+                (G, Eight)
+                (F, Seven)
+                (E, Six)
+                (C, Four)
+                (B, Three)
+                (A, Two)
+            ]
+
+            allSquares
+            |> Seq.iter(fun sq ->
+                let move = { SelectedPiece = bishop; From = start; To = sq }
+
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+
+                match validLocations |> List.contains sq with
+                | true -> result |> Expect.equal "Valid move" (Ok move)
+                | false -> result |> Expect.equal "Invalid move" (Error "")
+            )
+
+        testCase "Queen - only valid moves allowed" <| fun _ ->
+            let queen = { Player = White; Rank = Queen }
+            let start = (D, Five)
+
+            let game = gameStateWithEmptyBoard White |> addPiece queen start
+
+            let validDiagonalLocations = [
+                (A, Eight)
+                (B, Seven)
+                (C, Six)
+                (E, Four)
+                (F, Three)
+                (G, Two)
+                (H, One)
+                (G, Eight)
+                (F, Seven)
+                (E, Six)
+                (C, Four)
+                (B, Three)
+                (A, Two)
+            ]
+
+            allSquares
+            |> Seq.iter(fun sq ->
+                let move = { SelectedPiece = queen; From = start; To = sq }
+
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+
+                match validDiagonalLocations |> List.contains sq with
+                | true -> result |> Expect.equal "Valid move" (Ok move)
+                | false ->
+                    match sq with
+                    | (D, Five) -> result |> Expect.equal "Invalid move" (Error "")
+                    | (D, _)
+                    | (_, Five)
+                        -> result |> Expect.equal "Valid move" (Ok move)
+                    | _ -> result |> Expect.equal "Invalid move" (Error "")
+            )        
+
+        
+
+        testCase "King - only valid moves allowed" <| fun _ ->
+            let king = { Player = White; Rank = King }
+            let start = (D, Five)
+
+            let game = gameStateWithEmptyBoard White |> addPiece king start
+
+            let validLocations = [
+                (D, Four)
+                (D, Six)
+                (C, Four)
+                (C, Five)
+                (C, Six)
+                (E, Four)
+                (E, Five)
+                (E, Six)
+            ]
+
+            allSquares
+            |> Seq.iter(fun sq ->
+                let move = { SelectedPiece = king; From = start; To = sq }
+
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+
+                match validLocations |> List.contains sq with
+                | true -> result |> Expect.equal "Valid move" (Ok move)
+                | false -> result |> Expect.equal "Invalid move" (Error "")
+            )  
     ]

@@ -25,8 +25,7 @@ module Result =
         member __.Run(f) = f()
 
         member __.TryWith(m, h) =
-            try __.ReturnFrom(m)
-            with e -> h e
+            try m() with ex -> h ex
 
         member __.TryFinally(m, compensation) =
             try __.ReturnFrom(m)

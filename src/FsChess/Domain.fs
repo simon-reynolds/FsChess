@@ -120,27 +120,18 @@ module Moves =
 
     let validateMoveForPiece (board : Board) player (move : ProposedMoveWithKnownPiece) =
 
-        let isValidPawnNotMoved (board : Board) player move =
+        let isValidPawnMove (board : Board) player pawnState move =
             let distance = getDistance move
             let direction = match player with | White -> 1 | Black -> -1
             let target = board.[move.To]
 
-            match ((abs distance.Horizontal), (distance.Vertical), target) with
-            | (x, y, None) when x = 0 && y = (1 * direction) -> Ok move
-            | (x, y, None) when x = 0 && y = (2 * direction) -> Ok move
-            | (x, y, Some _) when x = 1 && y = (1 * direction) -> Ok move
-            | (x, y, None) when x = 1 && y = (2 * direction) ->
-                Ok move // en passant to be handled here
-            | _ -> Error ""
-
-        let isValidPawnMoved (board : Board) player move =
-            let distance = getDistance move
-            let direction = match player with | White -> 1 | Black -> -1
-            let target = board.[move.To]
-
-            match ((abs distance.Horizontal), (distance.Vertical), target) with
-            | (x, y, None) when x = 0 && y = (1 * direction) -> Ok move
-            | (x, y, Some _) when x = 1 && y = (1 * direction) -> Ok move
+            match ((abs distance.Horizontal), (distance.Vertical), target, pawnState) with
+            | (x, y, None, _) when x = 0 && y = (1 * direction) -> Ok move
+            | (x, y, None, NotMoved) when x = 0 && y = (2 * direction) -> Ok move
+            | (x, y, None, Moved) when x = 0 && y = (2 * direction) -> Error ""
+            | (x, y, Some _, _) when x = 1 && y = (1 * direction) -> Ok move
+            | (x, y, None, _) when x = 1 && y = (2 * direction) ->
+                Error "" // en passant to be handled here
             | _ -> Error ""
 
         let isStraightLine move =
@@ -164,7 +155,12 @@ module Moves =
             | _ -> Error ""
 
         let isStraightLineOrDiagonal move =
-            isStraightLine move >>= isDiagonal
+            let distance = getDistance move
+            match ((abs distance.Horizontal), (abs distance.Vertical)) with
+            | (x, y) when x > 0 && y = 0 -> Ok move
+            | (x, y) when x = 0 && y > 0 -> Ok move
+            | (x, y) when x > 0 && y = x -> Ok move
+            | _ -> Error ""
 
         let isOneSquareInAnyDirection move =
             let distance = getDistance move
@@ -175,8 +171,8 @@ module Moves =
             | _ -> Error ""
 
         match move.SelectedPiece.Rank with
-        | Pawn NotMoved -> isValidPawnNotMoved board player move
-        | Pawn Moved -> isValidPawnMoved board player move
+        | Pawn NotMoved -> isValidPawnMove board player NotMoved move
+        | Pawn Moved -> isValidPawnMove board player Moved move
         | Rook -> isStraightLine move
         | Knight -> isLShape move
         | Bishop -> isDiagonal move
