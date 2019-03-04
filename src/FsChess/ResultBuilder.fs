@@ -25,21 +25,10 @@ module Result =
         member __.Run(f) = f()
 
         member __.TryWith(m, h) =
-            try m() with ex -> h ex
+            try __.Run(m) with ex -> h ex
 
-        member __.TryFinally(m, compensation) =
-            try __.ReturnFrom(m)
+        member __.TryFinally(m : unit -> Result<_, _>, compensation) =
+            try __.Run(m)
             finally compensation()
-
-        member __.Using(res:#IDisposable, body) =
-            __.TryFinally(body res, fun () -> match res with null -> () | disp -> disp.Dispose())
-
-        member __.While(guard, f) =
-            if not (guard()) then Ok () else
-            do f() |> ignore
-            __.While(guard, f)
-
-        member __.For(sequence:seq<_>, body) =
-            __.Using(sequence.GetEnumerator(), fun enum -> __.While(enum.MoveNext, __.Delay(fun () -> body enum.Current)))
 
     let result = ResultBuilder()

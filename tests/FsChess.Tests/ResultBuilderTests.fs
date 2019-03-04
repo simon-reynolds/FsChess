@@ -13,6 +13,9 @@ let result2 str : Result<string, MyErr> = match str with | "pass" -> Ok "This te
 let resultGoesBoom () : Result<string, string> =
     failwith "Boom!"
 
+let resultToCompute () : Result<string, string> =
+    Ok "pass"
+
 [<Tests>]
 let resultBuilderTests =
     testList "ResultBuilder" [
@@ -54,22 +57,22 @@ let resultBuilderTests =
         testCase "Works as expected - Combine" <| fun _ ->
             let a = "pass" |> result1 >>= result2
             let b = result.Combine("pass" |> result1, result2)
-            Expect.equal a b "Should match"                
+            Expect.equal a b "Should match"
 
-        testCase "Works as expected - Bind" <| fun _ ->            
+        testCase "Works as expected - Bind" <| fun _ ->
             let err = Err1
             let b = result.Bind((Some "fail", err), result2)
             Expect.equal b (Error err) "Should match"
 
-        testCase "Works as expected with exception - TryWith" <| fun _ ->            
+        testCase "Works as expected with exception - TryWith" <| fun _ ->
             let b = result.TryWith(resultGoesBoom, fun e -> Error "That went boom")
             Expect.equal b (Error "That went boom") "Should match"
 
-        testCase "Works as expected with exception - TryFinally" <| fun _ ->            
-            
+        testCase "Works as expected with exception - TryFinally" <| fun _ ->
+
             let mutable assertion = false
-            
-            let b = result.TryFinally(result1 "pass", fun () -> assertion <- true)
-            Expect.equal assertion true "Should match"  
+
+            let b = result.TryFinally(resultToCompute, fun () -> assertion <- true)
+            Expect.equal assertion true "Should match"
 
     ]
