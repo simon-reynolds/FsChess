@@ -29,6 +29,21 @@ module Domain =
     type GameStatus = | InProgress | WhiteInCheck | WhiteInCheckmate | BlackInCheck | BlackInCheckmate | Stalemate
     type GameState = { Board : Board; CurrentPlayer : Colour; Status : GameStatus; Message : string; MoveHistory : ValidatedMove list }
     type Distance = { Horizontal : int; Vertical : int }
+    type Vector =
+        { X : int; Y : int }
+            with
+                static member MakeUnit distance =
+
+                    let normalise n =
+                        match n with
+                        | x when x > 0 -> 1
+                        | x when x < 0 -> -1
+                        | 0 -> 0
+
+                    { X = normalise distance.Horizontal; Y = normalise distance.Vertical }  
+
+                static member (+) (first, second) =
+                    { X = first.X + second.X; Y =  first.Y + second.Y }
 
     let initialiseGame () =
 
@@ -179,6 +194,49 @@ module Moves =
         | Queen -> isStraightLineOrDiagonal move
         | King -> isOneSquareInAnyDirection move
 
+    let validateNoCollision (board : Board) (move : ProposedMoveWithKnownPiece) =
+        match move.SelectedPiece.Rank with
+        | Knight -> Ok move // Knights can jump over other pieces
+        | _ ->
+            
+            let distance = getDistance move
+            let unitVector = Vector.MakeUnit distance
+
+            let getCoordsFromSquare square =
+                let (col, row) = square
+                let colIdx = Column.List |> List.findIndex ((=) col)
+                let rowIdx = Row.List |> List.findIndex ((=) row)
+                { X = colIdx; Y =  rowIdx}
+
+            let getSquareFromCoords coords =
+                let colIdx = coords.X
+                let rowIdx = coords.Y
+                if colIdx < Column.List.Length && colIdx >= 0 && rowIdx < Column.List.Length && rowIdx >= 0
+                then Some (Column.List.[colIdx], Row.List.[rowIdx])
+                else None
+
+            let rec moveSeq startCell vector = 
+                seq {
+                    let nextCell = startCell
+                                   |> getCoordsFromSquare
+                                   |> (+) vector
+                                   |> getSquareFromCoords
+                
+                    if nextCell.IsSome then
+                        yield nextCell.Value
+                        yield! moveSeq nextCell.Value vector
+                }
+
+            let valid = moveSeq move.From unitVector
+                        |> Seq.takeWhile ((<>) move.To)
+                        |> Seq.forall (fun move -> board.[move].IsNone)            
+
+            match valid with
+            | true -> Ok move
+            | false -> Error "There is a piece blocking this move"
+
+
+
     let validateMove (gameState : GameState) (move : ProposedMove) =
 
         result {
@@ -188,5 +246,6 @@ module Moves =
                 >>= validateNoFriendlyFire gameState.Board gameState.CurrentPlayer
                 // All move validation goes here
                 >>= validateMoveForPiece gameState.Board gameState.CurrentPlayer
+                >>= validateNoCollision gameState.Board
                 >>= markMoveAsValidated gameState.Board
         }
