@@ -460,3 +460,29 @@ let moveValidationTests =
                 | false -> result |> Expect.equal "Invalid move" (Error "")
             )  
     ]
+
+[<Tests>]
+let moveCollisionTests =
+    testList "Collision" [
+
+        testCase "Collision prevents move being valid" <| fun _ ->
+            let bishop = { Rank = Bishop; Player = White }
+            let start = (A, One)
+
+            let blockingPiece = { Rank = Pawn Moved; Player = Black }
+            let blockingPosition = (D, Four)
+
+            let targetPosition = (E, Five)
+
+            let game =
+                gameStateWithEmptyBoard White
+                |> addPiece bishop start
+                |> addPiece blockingPiece blockingPosition
+
+            let move = { SelectedPiece = bishop; From = start; To = targetPosition }
+
+            let result = validateNoCollision game.Board move
+
+            result |> Expect.equal "Collision detected" (Error "There is a piece blocking this move")
+
+    ]
