@@ -8,7 +8,7 @@ open Expecto.Flip
 let allSquares = Row.List |> Seq.allPairs Column.List
 
 let gameStateWithEmptyBoard player =
-    
+
     let squares = allSquares |> Seq.map (fun sq -> (sq, None))
     {
         Board = squares |> Map
@@ -279,12 +279,12 @@ let moveValidationTests =
             |> Seq.iter(fun sq ->
                 let move = { SelectedPiece = pawn; From = start; To = sq }
 
-                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
                 | false -> result |> Expect.equal "Invalid move" (Error "")
-            )  
+            )
 
         testCase "Moved Pawn - only valid moves allowed" <| fun _ ->
             let pawn = { Player = White; Rank = Pawn Moved }
@@ -303,7 +303,7 @@ let moveValidationTests =
             |> Seq.iter(fun sq ->
                 let move = { SelectedPiece = pawn; From = start; To = sq }
 
-                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
@@ -320,7 +320,7 @@ let moveValidationTests =
             |> Seq.iter(fun sq ->
                 let move = { SelectedPiece = rook; From = start; To = sq }
 
-                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move
 
                 match sq with
                 | (D, Five) -> result |> Expect.equal "Invalid move" (Error "")
@@ -328,7 +328,7 @@ let moveValidationTests =
                 | (_, Five)
                     -> result |> Expect.equal "Valid move" (Ok move)
                 | _ -> result |> Expect.equal "Invalid move" (Error "")
-            )        
+            )
 
         testCase "Knight - only valid moves allowed" <| fun _ ->
             let knight = { Player = White; Rank = Knight }
@@ -351,7 +351,7 @@ let moveValidationTests =
             |> Seq.iter(fun sq ->
                 let move = { SelectedPiece = knight; From = start; To = sq }
 
-                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
@@ -384,7 +384,7 @@ let moveValidationTests =
             |> Seq.iter(fun sq ->
                 let move = { SelectedPiece = bishop; From = start; To = sq }
 
-                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
@@ -417,7 +417,7 @@ let moveValidationTests =
             |> Seq.iter(fun sq ->
                 let move = { SelectedPiece = queen; From = start; To = sq }
 
-                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move
 
                 match validDiagonalLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
@@ -428,9 +428,9 @@ let moveValidationTests =
                     | (_, Five)
                         -> result |> Expect.equal "Valid move" (Ok move)
                     | _ -> result |> Expect.equal "Invalid move" (Error "")
-            )        
+            )
 
-        
+
 
         testCase "King - only valid moves allowed" <| fun _ ->
             let king = { Player = White; Rank = King }
@@ -453,17 +453,33 @@ let moveValidationTests =
             |> Seq.iter(fun sq ->
                 let move = { SelectedPiece = king; From = start; To = sq }
 
-                let result = validateMoveForPiece game.Board game.CurrentPlayer move  
+                let result = validateMoveForPiece game.Board game.CurrentPlayer move
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
                 | false -> result |> Expect.equal "Invalid move" (Error "")
-            )  
+            )
     ]
 
 [<Tests>]
 let moveCollisionTests =
     testList "Collision" [
+
+        testCase "No collision means move is valid" <| fun _ ->
+            let bishop = { Rank = Bishop; Player = White }
+            let start = (A, One)
+
+            let targetPosition = (H, Eight)
+
+            let game =
+                gameStateWithEmptyBoard White
+                |> addPiece bishop start
+
+            let move = { SelectedPiece = bishop; From = start; To = targetPosition }
+
+            let result = validateNoCollision game.Board move
+
+            result |> Expect.equal "No collision detected" (Ok move)
 
         testCase "Collision prevents move being valid" <| fun _ ->
             let bishop = { Rank = Bishop; Player = White }
