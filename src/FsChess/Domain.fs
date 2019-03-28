@@ -118,9 +118,9 @@ module Moves =
 
 
     let validatePieceIsGood playerToMove (move : ProposedMoveWithKnownPiece) =
-        match (playerToMove = move.SelectedPiece.Player) with
-        | true -> Ok move
-        | false -> Error "You cannot move another player's piece"
+        if (playerToMove = move.SelectedPiece.Player) then
+            Ok move
+        else Error "You cannot move another player's piece"
 
     let validateNoFriendlyFire (board : Board) playerToMove (move : ProposedMoveWithKnownPiece) =
 
@@ -128,9 +128,9 @@ module Moves =
 
         match targetPiece with
         | Some p ->
-            match playerToMove = p.Player with
-            | true -> Error "You cannot capture your own piece"
-            | false -> Ok move
+            if playerToMove = p.Player then
+                Error "You cannot capture your own piece"
+            else Ok move
         | None -> Ok move
 
     let validateMoveForPiece (board : Board) player (move : ProposedMoveWithKnownPiece) =
@@ -231,9 +231,9 @@ module Moves =
                         |> Seq.takeWhile ((<>) move.To)
                         |> Seq.forall (fun move -> board.[move].IsNone)            
 
-            match valid with
-            | true -> Ok move
-            | false -> Error "There is a piece blocking this move"
+            if valid then
+                Ok move
+            else Error "There is a piece blocking this move"
 
 
 
