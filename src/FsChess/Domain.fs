@@ -40,7 +40,7 @@ module Domain =
                         | x when x < 0 -> -1
                         | 0 -> 0
 
-                    { X = normalise distance.Horizontal; Y = normalise distance.Vertical }  
+                    { X = normalise distance.Horizontal; Y = normalise distance.Vertical }
 
                 static member (+) (first, second) =
                     { X = first.X + second.X; Y =  first.Y + second.Y }
@@ -106,7 +106,7 @@ module Moves =
         let deltaX = (Column.List |> List.findIndex (fun c -> c = toX)) - (Column.List |> List.findIndex (fun c -> c = fromX))
         let deltaY = (Row.List |> List.findIndex (fun c -> c = toY)) - (Row.List |> List.findIndex (fun c -> c = fromY))
 
-        { Horizontal = deltaX; Vertical = deltaY}
+        { Horizontal = deltaX; Vertical = deltaY }
 
     let markMoveAsValidated (board : Board) (move : ProposedMoveWithKnownPiece) =
         Ok { Piece = move.SelectedPiece; From = move.From; To = move.To; CapturedPiece = board.[move.To] }
@@ -143,39 +143,34 @@ module Moves =
             match ((abs distance.Horizontal), (distance.Vertical), target, pawnState) with
             | (x, y, None, _) when x = 0 && y = (1 * direction) -> Ok move
             | (x, y, None, NotMoved) when x = 0 && y = (2 * direction) -> Ok move
-            | (x, y, None, Moved) when x = 0 && y = (2 * direction) -> Error ""
+            | (x, y, None, Moved) when x = 0 && y = (2 * direction) -> Error "This is not a valid move"
             | (x, y, Some _, _) when x = 1 && y = (1 * direction) -> Ok move
             | (x, y, None, _) when x = 1 && y = (2 * direction) ->
-                Error "" // en passant to be handled here
-            | _ -> Error ""
+                Error "This is not a valid move" // en passant to be handled here
+            | _ -> Error "This is not a valid move"
 
         let isStraightLine move =
             let distance = getDistance move
             match ((abs distance.Horizontal), (abs distance.Vertical)) with
             | (x, y) when x > 0 && y = 0 -> Ok move
             | (x, y) when x = 0 && y > 0 -> Ok move
-            | _ -> Error ""
+            | _ -> Error "This is not a valid move"
 
         let isLShape move =
             let distance = getDistance move
             match ((abs distance.Horizontal), (abs distance.Vertical)) with
             | (2, 1) -> Ok move
             | (1, 2) -> Ok move
-            | _ -> Error ""
+            | _ -> Error "This is not a valid move"
 
         let isDiagonal move =
             let distance = getDistance move
             match ((abs distance.Horizontal), (abs distance.Vertical)) with
             | (x, y) when x > 0 && y = x -> Ok move
-            | _ -> Error ""
+            | _ -> Error "This is not a valid move"
 
         let isStraightLineOrDiagonal move =
-            let distance = getDistance move
-            match ((abs distance.Horizontal), (abs distance.Vertical)) with
-            | (x, y) when x > 0 && y = 0 -> Ok move
-            | (x, y) when x = 0 && y > 0 -> Ok move
-            | (x, y) when x > 0 && y = x -> Ok move
-            | _ -> Error ""
+            (isStraightLine move) <-> (isDiagonal move)
 
         let isOneSquareInAnyDirection move =
             let distance = getDistance move
@@ -183,7 +178,7 @@ module Moves =
             | (x, y) when x = 1 && y = 0 -> Ok move
             | (x, y) when x = 0 && y = 1 -> Ok move
             | (x, y) when x = 1 && y = 1 -> Ok move
-            | _ -> Error ""
+            | _ -> Error "This is not a valid move"
 
         match move.SelectedPiece.Rank with
         | Pawn NotMoved -> isValidPawnMove board player NotMoved move
@@ -198,7 +193,7 @@ module Moves =
         match move.SelectedPiece.Rank with
         | Knight -> Ok move // Knights can jump over other pieces
         | _ ->
-            
+
             let distance = getDistance move
             let unitVector = Vector.MakeUnit distance
 
@@ -215,13 +210,13 @@ module Moves =
                 then Some (Column.List.[colIdx], Row.List.[rowIdx])
                 else None
 
-            let rec moveSeq startCell vector = 
+            let rec moveSeq startCell vector =
                 seq {
                     let nextCell = startCell
                                    |> getCoordsFromSquare
                                    |> (+) vector
                                    |> getSquareFromCoords
-                
+
                     if nextCell.IsSome then
                         yield nextCell.Value
                         yield! moveSeq nextCell.Value vector
@@ -229,7 +224,7 @@ module Moves =
 
             let valid = moveSeq move.From unitVector
                         |> Seq.takeWhile ((<>) move.To)
-                        |> Seq.forall (fun move -> board.[move].IsNone)            
+                        |> Seq.forall (fun move -> board.[move].IsNone)
 
             if valid then
                 Ok move

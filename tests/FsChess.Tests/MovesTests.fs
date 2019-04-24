@@ -283,7 +283,7 @@ let moveValidationTests =
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
-                | false -> result |> Expect.equal "Invalid move" (Error "")
+                | false -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
             )
 
         testCase "Moved Pawn - only valid moves allowed" <| fun _ ->
@@ -307,7 +307,7 @@ let moveValidationTests =
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
-                | false -> result |> Expect.equal "Invalid move" (Error "")
+                | false -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
             )
 
         testCase "Rook - only valid moves allowed" <| fun _ ->
@@ -323,11 +323,11 @@ let moveValidationTests =
                 let result = validateMoveForPiece game.Board game.CurrentPlayer move
 
                 match sq with
-                | (D, Five) -> result |> Expect.equal "Invalid move" (Error "")
+                | (D, Five) -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
                 | (D, _)
                 | (_, Five)
                     -> result |> Expect.equal "Valid move" (Ok move)
-                | _ -> result |> Expect.equal "Invalid move" (Error "")
+                | _ -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
             )
 
         testCase "Knight - only valid moves allowed" <| fun _ ->
@@ -355,7 +355,7 @@ let moveValidationTests =
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
-                | false -> result |> Expect.equal "Invalid move" (Error "")
+                | false -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
             )
 
         testCase "Bishop - only valid moves allowed" <| fun _ ->
@@ -388,7 +388,7 @@ let moveValidationTests =
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
-                | false -> result |> Expect.equal "Invalid move" (Error "")
+                | false -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
             )
 
         testCase "Queen - only valid moves allowed" <| fun _ ->
@@ -423,11 +423,11 @@ let moveValidationTests =
                 | true -> result |> Expect.equal "Valid move" (Ok move)
                 | false ->
                     match sq with
-                    | (D, Five) -> result |> Expect.equal "Invalid move" (Error "")
+                    | (D, Five) -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
                     | (D, _)
                     | (_, Five)
                         -> result |> Expect.equal "Valid move" (Ok move)
-                    | _ -> result |> Expect.equal "Invalid move" (Error "")
+                    | _ -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
             )
 
 
@@ -457,7 +457,7 @@ let moveValidationTests =
 
                 match validLocations |> List.contains sq with
                 | true -> result |> Expect.equal "Valid move" (Ok move)
-                | false -> result |> Expect.equal "Invalid move" (Error "")
+                | false -> result |> Expect.equal "Invalid move" (Error "This is not a valid move")
             )
     ]
 

@@ -4,7 +4,11 @@ module Result =
 
     let (>>=) result binder = Result.bind binder result
 
-    open System
+    /// Return result1 if Ok, result2 otherwise
+    let (<->) result1 result2 =
+        match result1 with
+        | Ok _ -> result1
+        | Error _ -> result2
 
     let ofOption error = function Some s -> Ok s | None -> Error error
 
