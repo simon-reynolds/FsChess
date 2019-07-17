@@ -1,0 +1,10 @@
+{
+	"name": "FsChess",
+	"dockerFile": "Dockerfile",
+	"extensions": [
+		"ionide.ionide-fsharp",
+        "ms-vscode.csharp",
+        "editorconfig.editorconfig",
+        "msjsdiag.debugger-for-chrome"
+	]
+}
