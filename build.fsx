@@ -81,7 +81,8 @@ module dotnet =
         tool optionConfig "fantomas" args
 
     let reportgenerator optionConfig args =
-        tool optionConfig "reportgenerator" args
+        DotNet.exec optionConfig  "./packages/ReportGenerator/tools/netcoreapp3.0/ReportGenerator.dll" args
+        |> failOnBadExitAndPrint
 
     let sourcelink optionConfig args =
         tool optionConfig "sourcelink" args
