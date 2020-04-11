@@ -10,6 +10,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ResultBuilder.fs" />
     <Compile Include="Domain.fs" />
+    <Compile Include="Moves.fs" />
   </ItemGroup>
   <Import Project="..\..\fsc.props" />
   <Import Project="..\..\netfx.props" />

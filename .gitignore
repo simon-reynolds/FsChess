@@ -268,3 +268,6 @@ coverage.*.xml
 # Paket tool store
 .paket/.store
 .paket/paket
+
+.fake
+.ionide
