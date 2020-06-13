@@ -1,10 +1,12 @@
 {
 	"name": "FsChess",
 	"dockerFile": "Dockerfile",
+	"appPort": [8080],
 	"extensions": [
 		"ionide.ionide-fsharp",
-        "ms-vscode.csharp",
-        "editorconfig.editorconfig",
-        "msjsdiag.debugger-for-chrome"
+        "ms-dotnettools.csharp",
+        "editorconfig.editorconfig",        
+        "ionide.ionide-paket",
+        "ionide.ionide-fake"
 	]
-}
+} 
