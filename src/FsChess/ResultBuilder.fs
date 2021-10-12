@@ -10,7 +10,10 @@ module Result =
         | Ok _ -> result1
         | Error _ -> result2
 
-    let ofOption error = function Some s -> Ok s | None -> Error error
+    let ofOption error =
+        function
+        | Some s -> Ok s
+        | None -> Error error
 
     type ResultBuilder() =
         member __.Return(x) = Ok x
@@ -26,13 +29,18 @@ module Result =
 
         member __.Delay(f: unit -> _) = f
 
-        member __.Run(f) = f()
+        member __.Run(f) = f ()
 
         member __.TryWith(m, h) =
-            try __.Run(m) with ex -> h ex
+            try
+                __.Run(m)
+            with
+            | ex -> h ex
 
-        member __.TryFinally(m : unit -> Result<_, _>, compensation) =
-            try __.Run(m)
-            finally compensation()
+        member __.TryFinally(m: unit -> Result<_, _>, compensation) =
+            try
+                __.Run(m)
+            finally
+                compensation ()
 
     let result = ResultBuilder()

@@ -2,12 +2,12 @@
     <PropertyGroup>
         <!-- summary is not migrated from project.json, but you can use the <Description> property for that if needed. -->
         <PackageTags>f#, fsharp</PackageTags>
-        <PackageProjectUrl>https://github.com/simontaite/FsChess</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/simontaite/FsChess/blob/master/LICENSE.md</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/simon-reynolds/FsChess</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/simon-reynolds/FsChess/blob/master/LICENSE.md</PackageLicenseUrl>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <RepositoryType>git</RepositoryType>
-        <Authors>simontaite</Authors>
-        <RepositoryUrl>https://github.com/simontaite/FsChess</RepositoryUrl>
+        <Authors>simon-reynolds</Authors>
+        <RepositoryUrl>https://github.com/simon-reynolds/FsChess</RepositoryUrl>
         <!-- owners is not supported in MSBuild -->
     </PropertyGroup>
 </Project>
