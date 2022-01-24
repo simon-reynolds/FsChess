@@ -117,18 +117,15 @@ module Domain =
 
     let initialiseGame () =
 
-        let blackPawn =
-            Some { Player = Black; Rank = Pawn NotMoved }
+        let blackPawn = Some { Player = Black; Rank = Pawn NotMoved }
 
-        let whitePawn =
-            Some { Player = White; Rank = Pawn NotMoved }
+        let whitePawn = Some { Player = White; Rank = Pawn NotMoved }
 
         let black rank = Some { Player = Black; Rank = rank }
         let white rank = Some { Player = White; Rank = rank }
 
         let createRow row pieces =
-            let cells =
-                Column.List |> List.map (fun col -> (col, row))
+            let cells = Column.List |> List.map (fun col -> (col, row))
 
             List.zip cells pieces
 

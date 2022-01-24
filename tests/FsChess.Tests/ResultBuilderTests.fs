@@ -66,8 +66,7 @@ module ResultBuilderTests =
               <| fun _ ->
                   let a = "pass" |> result1 >>= result2
 
-                  let b =
-                      result.Combine("pass" |> result1, result2)
+                  let b = result.Combine("pass" |> result1, result2)
 
                   Expect.equal a b "Should match"
 
@@ -79,8 +78,7 @@ module ResultBuilderTests =
 
               testCase "Works as expected with exception - TryWith"
               <| fun _ ->
-                  let b =
-                      result.TryWith(resultGoesBoom, (fun e -> Error "That went boom"))
+                  let b = result.TryWith(resultGoesBoom, (fun e -> Error "That went boom"))
 
                   Expect.equal b (Error "That went boom") "Should match"
 
@@ -89,8 +87,7 @@ module ResultBuilderTests =
 
                   let mutable assertion = false
 
-                  let b =
-                      result.TryFinally(resultToCompute, (fun () -> assertion <- true))
+                  let b = result.TryFinally(resultToCompute, (fun () -> assertion <- true))
 
                   Expect.equal assertion true "Should match"
 

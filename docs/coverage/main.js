@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "FsChess",
     "classes": [
-      { "name": "FsChess.Domain", "rp": "FsChess_Domain.html", "cl": 140, "ucl": 2, "cal": 142, "tl": 248, "ct": "LineCoverage", "mc": "-", "cb": 9, "tb": 12, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsChess.Domain", "rp": "FsChess_Domain.html", "cl": 137, "ucl": 2, "cal": 139, "tl": 245, "ct": "LineCoverage", "mc": "-", "cb": 9, "tb": 12, "lch": [], "bch": [], "hc": [] },
       { "name": "FsChess.Moves", "rp": "FsChess_Moves.html", "cl": 127, "ucl": 1, "cal": 128, "tl": 217, "ct": "LineCoverage", "mc": "-", "cb": 79, "tb": 83, "lch": [], "bch": [], "hc": [] },
       { "name": "FsChess.Result", "rp": "FsChess_Result.html", "cl": 22, "ucl": 1, "cal": 23, "tl": 46, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
     ]},
