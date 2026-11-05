@@ -1,8 +1,8 @@
 source https://www.nuget.org/api/v2
 source https://api.nuget.org/v3/index.json
 storage: none
-nuget FSharp.Core 6.0
-nuget Microsoft.SourceLink.GitHub 1.1.0 copy_local: true
+nuget FSharp.Core 10.1.403
+nuget Microsoft.SourceLink.GitHub 10.0.403 copy_local: true
 nuget Expecto 9.0.4
 nuget YoloDev.Expecto.TestSdk 0.12.12
 nuget Microsoft.NET.Test.Sdk 17.1.0-preview-20211109-03
@@ -32,8 +32,8 @@ group Docs
     source https://www.nuget.org/api/v2
     source https://api.nuget.org/v3/index.json
     nuget Argu
-    nuget FSharp.Compiler.Service 34.1.0
-    nuget FSharp.Core ~> 4.6
+    nuget FSharp.Compiler.Service 43.12.403
+    nuget FSharp.Core ~> 10.1
     nuget Fake.IO.FileSystem 5.20.4
     nuget FAKE.Core.Environment 5.20.4
     nuget Fake.DotNet.Cli 5.20.4
